@@ -27,26 +27,31 @@ jobs:
         pip install git+https://github.com/OpenPecha/vulgatizer.git
     - name: Create vulgate text
       run: |
+        import os
         from openpecha.core.ids import get_open_pecha_id
         from openpecha.core.pecha import OpenPechaFS
         from pathlib import Path
         from vulgatizer.vulgatizer_plain_text import VulgatizerPlainText
+
         def run_vulgatizer(witness_dir):
-          pecha_id = get_open_pecha_id()
-          vulga_opf_path = Path(f'./vulga/{pecha_id}.opf')
-          try:
-            witness_paths = list(witness_dir.iterdir())
-          except:
-            print("witness directory doesn't exist")
-            return None
-          witness_paths.sort()
-          op_output = OpenPechaFS(vulga_opf_path)
-          vulgatizer = VulgatizerPlainText(op_output)
-          for witness_path in witness_paths:
-              vulgatizer.add_witness(witness_path)
-          vulgatizer.create_vulgate()
-          return vulga_opf_path
+            pecha_id = get_open_pecha_id()
+            vulga_opf_path = Path(f'./vulga/{pecha_id}.opf')
+            try:
+                witness_paths = list(witness_dir.iterdir())
+            except:
+                print("witness directory doesn't exist")
+                return None
+            witness_paths.sort()
+            op_output = OpenPechaFS(vulga_opf_path)
+            vulgatizer = VulgatizerPlainText(op_output)
+            for witness_path in witness_paths:
+                vulgatizer.add_witness(witness_path)
+            vulgatizer.create_vulgate()
+            return vulga_opf_path
+
         witness_dir = Path('./witnesses')
+        Path('./res/bo/').mkdir(parents=True, exist_ok=True)
+        os.system('curl https://raw.githubusercontent.com/OpenPecha/vulgatizer/main/res/bo/syllist.txt > ./res/bo/syllist.txt')
         run_vulgatizer(witness_dir)
       shell: python
 
